@@ -398,7 +398,7 @@
                                 </a>
                             </li>
                             <li class="aiz-side-nav-item">
-                                <a href="{{ route('wish_report.index') }}" class="aiz-side-nav-link {{ areActiveRoutes(['wish_report.index'])}}">
+                                <a href="{{ route('recharge-history.index') }}" class="aiz-side-nav-link {{ areActiveRoutes(['wish_report.index'])}}">
                                     <span class="aiz-side-nav-text">{{ translate('Topup history') }}</span>
                                 </a>
                             </li>

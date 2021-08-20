@@ -9,6 +9,7 @@ use App\Wallet;
 use App\Seller;
 use App\User;
 use App\Search;
+use App\MobileTopupTransaction;
 use Auth;
 
 class ReportController extends Controller
@@ -124,4 +125,36 @@ class ReportController extends Controller
 
         return view('backend.reports.wallet_history_report', compact('wallets', 'users_with_wallet', 'user_id', 'date_range'));
     }
+
+    public function recharge_history(Request $request) {
+       
+        $user_id = null;
+        $date_range = null;
+        
+        if($request->user_id) {
+            $user_id = $request->user_id;
+        }
+        
+        $users_with_wallet = User::whereIn('id', function($query) {
+            $query->select('user_id')->from(with(new MobileTopupTransaction)->getTable());
+        })->get();
+ 
+        $topup_history = MobileTopupTransaction::orderBy('created_at', 'desc');
+        
+        if ($request->date_range) {
+            $date_range = $request->date_range;
+            $date_range1 = explode(" / ", $request->date_range);
+            $topup_history = $topup_history->where('created_at', '>=', $date_range1[0]);
+            $topup_history = $topup_history->where('created_at', '<=', $date_range1[1]);
+        }
+        if ($user_id) {
+            $topup_history = $topup_history->where('user_id', '=', $user_id);
+        }
+        
+        $topups = $topup_history->paginate(10);
+ 
+        return view('backend.reports.topup_history_report', compact('topups', 'users_with_wallet', 'user_id', 'date_range'));
+    }
+
+
 }

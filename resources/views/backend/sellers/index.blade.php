@@ -126,6 +126,9 @@
                                         <a href="#" onclick="show_seller_payment_modal('{{$seller->id}}');" class="dropdown-item">
                                           {{translate('Go to Payment')}}
                                         </a>
+                                        <a href="{{route('seller.sendpin', encrypt($seller->id))}}" class="dropdown-item" >
+                                            {{ translate('Send recharge pin') }}
+                                        </a>
                                         <a href="{{route('sellers.payment_history', encrypt($seller->id))}}" class="dropdown-item">
                                           {{translate('Payment History')}}
                                         </a>

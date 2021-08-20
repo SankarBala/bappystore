@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use App\Seller;
 use App\User;
 use App\Shop;
@@ -12,6 +13,7 @@ use App\OrderDetail;
 use Illuminate\Support\Facades\Hash;
 use App\Notifications\EmailVerificationNotification;
 use App\Wallet;
+use App\Mail\RechargePinSender;
 
 class SellerController extends Controller
 {
@@ -255,6 +257,21 @@ class SellerController extends Controller
         auth()->login($user, true);
 
         return redirect()->route('dashboard');
+    }
+
+    public function sendpin($id)
+    {
+        $customer = Seller::findOrFail(decrypt($id));
+
+        $user  = $customer->user;
+         
+        
+        $user->recharge_pin = rand(1000, 9999);
+        $user->save();
+
+        Mail::to($user)->send(new RechargePinSender($user));
+        flash(translate('Recharge pin send successfully'))->success();
+        return redirect()->route('sellers.index');
     }
 
     public function ban($id)

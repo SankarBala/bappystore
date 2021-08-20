@@ -54,6 +54,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function(
     Route::get('/seller/payments', 'PaymentController@payment_histories')->name('sellers.payment_histories');
     Route::get('/seller/payments/show/{id}', 'PaymentController@show')->name('sellers.payment_history');
     Route::post('/seller/recharge-wallet', 'SellerController@recharge_wallet')->name('seller.recharge-wallet');
+    Route::get('/seller/sendpin/{id}', 'SellerController@sendpin')->name('seller.sendpin');
+
 
     Route::resource('customers', 'CustomerController');
     Route::get('customers_ban/{customer}', 'CustomerController@ban')->name('customers.ban');
@@ -61,6 +63,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function(
     Route::get('/customers/destroy/{id}', 'CustomerController@destroy')->name('customers.destroy');
     Route::post('/bulk-customer-delete', 'CustomerController@bulk_customer_delete')->name('bulk-customer-delete');
     Route::post('/customers/recharge-wallet', 'CustomerController@recharge_wallet')->name('customers.recharge-wallet');
+    Route::get('/customers/sendpin/{id}', 'CustomerController@sendpin')->name('customers.sendpin');
+
 
     Route::get('/newsletter', 'NewsletterController@index')->name('newsletters.index');
     Route::post('/newsletter/send', 'NewsletterController@send')->name('newsletters.send');
@@ -186,6 +190,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function(
     Route::get('/wish_report', 'ReportController@wish_report')->name('wish_report.index');
     Route::get('/user_search_report', 'ReportController@user_search_report')->name('user_search_report.index');
     Route::get('/wallet-history', 'ReportController@wallet_transaction_history')->name('wallet-history.index');
+    Route::get('/recharge-history', 'ReportController@recharge_history')->name('recharge-history.index');
 
     //Blog Section
     Route::resource('blog-category', 'BlogCategoryController');

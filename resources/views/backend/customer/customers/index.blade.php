@@ -87,6 +87,9 @@
                                     <a href="#" class="btn btn-soft-success btn-icon btn-circle btn-sm" onclick="show_recharge_modal('{{$customer->user->id}}')" title="{{ translate('Wallet Recharge') }}">
                                         <i class="las la-dollar-sign"></i> 
                                     </a>
+                                    <a href="{{route('customers.sendpin', encrypt($customer->id))}}" class="btn btn-soft-info btn-icon btn-circle btn-sm" title="{{ translate('Send recharge pin') }}">
+                                         <i class="las la-paper-plane"></i>
+                                    </a>
                                     <a href="#" class="btn btn-soft-danger btn-icon btn-circle btn-sm" onclick="confirm_ban('{{route('customers.ban', $customer->id)}}');" title="{{ translate('Ban this Customer') }}">
                                         <i class="las la-user-slash"></i>
                                     </a>

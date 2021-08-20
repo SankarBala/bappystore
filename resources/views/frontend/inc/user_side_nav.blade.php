@@ -114,6 +114,13 @@
                     </li>
 
                     <li class="aiz-side-nav-item">
+                        <a href="{{ route('topup.index') }}" class="aiz-side-nav-link {{ areActiveRoutes(['topup.index'])}}">
+                                 <i class="las la-mobile-alt aiz-side-nav-icon"></i>
+                                 <span class="aiz-side-nav-text">{{translate('My Topup')}}</span>
+                        </a>
+                    </li>
+                    
+                    <li class="aiz-side-nav-item">
                         <a href="{{ route('digital_purchase_history.index') }}" class="aiz-side-nav-link {{ areActiveRoutes(['digital_purchase_history.index'])}}">
                             <i class="las la-download aiz-side-nav-icon"></i>
                             <span class="aiz-side-nav-text">{{ translate('Downloads') }}</span>

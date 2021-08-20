@@ -13,6 +13,7 @@ use Auth;
 use Session;
 use App\Wallet;
 use App\Utility\PayhereUtility;
+use App\MobileTopupTransaction;
 
 class WalletController extends Controller
 {
@@ -158,4 +159,142 @@ class WalletController extends Controller
         }
         return 0;
     }
+
+    public function topup_list(Request $request) {
+        $user = Auth::user();
+        $date_range = null;
+        
+        $topup_history = MobileTopupTransaction::where('user_id', '=', $user->id)
+                ->orderBy('created_at', 'desc');
+        if ($request->date_range) {
+            $date_range = $request->date_range;
+            $date_range1 = explode(" / ", $request->date_range);
+            $topup_history = $topup_history->whereDate('created_at', '>=', $date_range1[0]);
+            $topup_history = $topup_history->whereDate('created_at', '<=', $date_range1[1]);
+        }
+        $topups = $topup_history->paginate(10);
+ 
+        return view('frontend.user.wallet.topup.index', compact('topups', 'date_range'));
+    }
+    
+    public function topup(Request $request)
+    {
+        $user = Auth::user();
+        if($user->balance < $request->amount) {
+            flash(translate('You do not have enough balance in your wallet'))->error();
+            return redirect()->route('wallet.index');
+        }
+        
+        // $user_name = 'deshshopbd.com@gmail.com';
+        // $password = '3y216';
+        // $pin = '8271';
+        $user_name  = env('BDSMART_USERNAME');
+        $password   = env('BDSMART_PASSWORD');
+        $pin        = env('BDSMART_PIN');
+        $amount = $request->amount;
+        
+        //TOPUP BALANCE CHECK REQUEST
+        $data = array(
+            'username'      => $user_name, 
+            'password'      => $password, 
+            'pin'           => $pin,
+            'order_number'  => ''
+        );
+        
+        $check_balance_url = 'http://bdsmartpay.com/sms/topupbalanceapi.php';
+        
+        $options_check_balance = array(
+            'http' => array(
+                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method' => 'POST',
+                'content' => http_build_query($data)
+            )
+        );
+        $context_check_balance = stream_context_create($options_check_balance);
+        $check_balance_response = file_get_contents($check_balance_url, false, $context_check_balance);
+        $check_balance = (array) json_decode(base64_decode($check_balance_response));
+        
+        // echo 'Specific Response: <pre>';print_r($check_balance['status']);die;
+        if(isset($check_balance['status']) && $check_balance['status'] == 'false') {
+            flash(translate('Temporary Unavailable This Service'))->error();
+            return redirect()->route('topup.index');
+        }
+        if(isset($check_balance['balance']) &&  $check_balance['balance'] < $amount) {
+            flash(translate('Temporary Unavailable This Service'))->error();
+            return redirect()->route('topup.index');
+        }
+        
+        $data1 = array(
+            'username'      => $user_name, 
+            'password'      => $password, 
+            'pin'           => $pin,
+            'operator'      => $request->operator, 
+            'mobile'        => $request->mobile, 
+            'account_type'  => $request->account_type, 
+            'amount'        => $request->amount, 
+            'order_number'  => 'BS'.time());
+            
+        $url = 'http://bdsmartpay.com/sms/topupapi.php';
+        
+        $options = array(
+            'http' => array(
+                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method' => 'POST',
+                'content' => http_build_query($data1)
+            )
+        );
+        $context = stream_context_create($options);
+        $response = file_get_contents($url, false, $context);
+ 
+        $result = (array)json_decode(base64_decode($response));
+        
+        //echo 'Overall Response: <pre>';print_r($result);
+        //TOPUP STATUS REQUEST
+        $data = array(
+            'username'      => $user_name, 
+            'password'      => $password, 
+            'pin'           => $pin, 
+            'order_number'  => $result['order_number']
+        ); 
+        $url = 'http://bdsmartpay.com/sms/topupstatusapi.php'; 
+        $options = array( 
+            'http' => array( 
+                'header' => "Content-type: application/x-www-form-urlencoded\r\n", 
+                'method' => 'POST', 
+                'content' => http_build_query($data) 
+            )
+        ); 
+        $context = stream_context_create($options); 
+        $response = file_get_contents($url, false, $context); 
+        $status_result = (array)json_decode(base64_decode($response));
+        
+        //echo 'Specific Response: <pre>';print_r($status_result);
+        
+        if($status_result['error_code'] == '109') {
+            $user->balance = $user->balance - $request->amount;
+            $user->save();
+            $status_code = $status_result['error_code'];
+            $status_description = $status_result['description'];
+            
+            flash(translate($status_result['description']))->success();
+        } else {
+            $status_code = $status_result['error_code'];
+            $status_description = $status_result['description'];
+            
+            flash(translate($status_result['description']))->error();
+        }
+        
+        $topup_transaction = new MobileTopupTransaction;
+        $topup_transaction->user_id = $user->id;
+        $topup_transaction->mobile_no = $request->mobile;
+        $topup_transaction->topup_amount = $request->amount;
+        $topup_transaction->status_code = $status_code;
+        $topup_transaction->status_description = $status_description;
+        $topup_transaction->save();
+        
+        //dd($topup_transaction);
+        
+        return redirect()->route('topup.index');
+    }
+
 }

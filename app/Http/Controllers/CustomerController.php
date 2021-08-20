@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RechargePinSender;
 use App\Customer;
 use App\User;
 use App\Order;
@@ -158,6 +160,23 @@ class CustomerController extends Controller
 
         return redirect()->route('dashboard');
     }
+
+    public function sendpin($id)
+    {
+        $customer = Customer::findOrFail(decrypt($id));
+
+        $user  = $customer->user;
+         
+        
+        $user->recharge_pin = rand(1000, 9999);
+        $user->save();
+
+        Mail::to($user)->send(new RechargePinSender($user));
+        flash(translate('Recharge pin send successfully'))->success();
+        return redirect()->route('customers.index');
+    }
+
+
 
     public function ban($id) {
         $customer = Customer::findOrFail($id);

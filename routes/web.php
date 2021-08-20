@@ -170,6 +170,10 @@ Route::group(['middleware' => ['user', 'verified', 'unbanned']], function() {
     Route::get('/wallet', 'WalletController@index')->name('wallet.index');
     Route::post('/recharge', 'WalletController@recharge')->name('wallet.recharge');
 
+    //Topup
+    Route::post('/topup', 'WalletController@topup')->name('wallet.topup');
+    Route::get('/topup-history', 'WalletController@topup_list')->name('topup.index');
+
     Route::resource('support_ticket', 'SupportTicketController');
     Route::post('support_ticket/reply', 'SupportTicketController@seller_store')->name('support_ticket.seller_store');
 
