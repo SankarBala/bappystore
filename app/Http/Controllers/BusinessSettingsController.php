@@ -23,6 +23,16 @@ class BusinessSettingsController extends Controller
     	return view('backend.setup_configurations.activation');
     }
 
+
+    public function topup_activation(Request $request)
+    {
+        CoreComponentRepository::instantiateShopRepository();
+    	return view('backend.topup.settings');
+    }
+
+
+
+
     public function social_login(Request $request)
     {
         CoreComponentRepository::instantiateShopRepository();

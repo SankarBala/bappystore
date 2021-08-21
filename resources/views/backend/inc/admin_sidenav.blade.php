@@ -393,7 +393,7 @@
                         </a>
                         <ul class="aiz-side-nav-list level-2">
                             <li class="aiz-side-nav-item">
-                                <a href="{{ route('seller_sale_report.index') }}" class="aiz-side-nav-link {{ areActiveRoutes(['seller_sale_report.index'])}}">
+                                <a href="{{ route('topup_activation.index') }}" class="aiz-side-nav-link {{ areActiveRoutes(['seller_sale_report.index'])}}">
                                     <span class="aiz-side-nav-text">{{ translate('Topup settings') }}</span>
                                 </a>
                             </li>
